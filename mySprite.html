@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Space Adventure</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Press Start 2P', cursive;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        main {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            color: white;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .stage {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            margin: 20px auto;
+            position: relative;
+            background: radial-gradient(circle at center, #1c1c3d, #0a0a15);
+            overflow: hidden;
+            border: 2px solid white;
+        }
+
+        .spaceship {
+            width: 80px;
+            height: 80px;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: url('img/spaceCar.png') no-repeat center center;
+            background-size: contain;
+        }
+
+        .meteor {
+            width: 60px;
+            height: 60px;
+            position: absolute;
+            background: url('img/metoritlar.jpg') no-repeat center center;
+            background-size: contain;
+            animation: meteorFall 4s linear infinite;
+        }
+
+        .meteor1 { left: 10%; animation-delay: 0s; }
+        .meteor2 { left: 50%; animation-delay: 1s; }
+        .meteor3 { left: 80%; animation-delay: 2s; }
+
+        @keyframes meteorFall {
+            from { transform: translateY(-100px); }
+            to { transform: translateY(400px); }
+        }
+
+        .meteor.hit {
+            animation: none;
+            background-position: -240px 0; 
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Space Adventure</h1>
+        <p>Avoid the meteors to survive!</p>
+        <div class="stage">
+            <div class="spaceship"></div>
+            <div class="meteor meteor1"></div>
+            <div class="meteor meteor2"></div>
+            <div class="meteor meteor3"></div>
+        </div>
+    </main>
+
+    <script>
+        const spaceship = document.querySelector('.spaceship');
+        const stage = document.querySelector('.stage');
+        const stageWidth = stage.offsetWidth;
+
+        let spaceshipX = stageWidth / 2 - 40; // Initial position (half of stage width minus half spaceship width)
+
+        // Function to move spaceship automatically
+        function moveSpaceship() {
+            const meteors = document.querySelectorAll('.meteor');
+            let safeSpot = null;
+
+            // Check positions of all meteors
+            meteors.forEach(meteor => {
+                const meteorRect = meteor.getBoundingClientRect();
+                const spaceshipRect = spaceship.getBoundingClientRect();
+
+                // If a meteor is directly in the path of the spaceship, calculate a safe spot
+                if (
+                    meteorRect.bottom > spaceshipRect.top && // Meteor is approaching spaceship
+                    meteorRect.left < spaceshipRect.right &&
+                    meteorRect.right > spaceshipRect.left
+                ) {
+                    // Determine the safe direction: move left or right
+                    if (spaceshipX > stageWidth / 2) {
+                        // Move left if spaceship is on the right side
+                        safeSpot = Math.max(0, spaceshipX - 100);
+                    } else {
+                        // Move right if spaceship is on the left side
+                        safeSpot = Math.min(stageWidth - 80, spaceshipX + 100);
+                    }
+                }
+            });
+
+            // If a safe spot is identified, move the spaceship
+            if (safeSpot !== null) {
+                spaceshipX = safeSpot;
+                spaceship.style.left = `${spaceshipX}px`;
+            }
+        }
+
+       
+        function checkCollision(rect1, rect2) {
+            return (
+                rect1.left < rect2.right &&
+                rect1.right > rect2.left &&
+                rect1.top < rect2.bottom &&
+                rect1.bottom > rect2.top
+            );
+        }
+
+        // Game loop
+        function gameLoop() {
+            moveSpaceship();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop(); // Start 
+    </script>
+</body>
+</html>
